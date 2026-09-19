@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "ScreenSham",
+    "slug": "screensham",
+    "version": "1.0.1",
+    "orientation": "portrait",
+    "scheme": "screensham",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.screensham.app"
+    },
+    "android": {
+      "package": "com.screensham.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "screensham.app",
+              "pathPrefix": "/"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "plugins": [
+      "./plugins/withUsageStatsPermission"
+    ]
+  }
+}

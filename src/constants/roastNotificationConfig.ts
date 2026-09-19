@@ -1,0 +1,17 @@
+/** Must match RoastNotificationConfig.TEST_MODE in Kotlin. */
+export const ROAST_NOTIFICATION_TEST_MODE = false;
+
+export const ROAST_COOLDOWN_MS = ROAST_NOTIFICATION_TEST_MODE ? 30_000 : 10 * 60_000;
+
+export const ROAST_USAGE_THRESHOLDS_MIN = ROAST_NOTIFICATION_TEST_MODE
+  ? [1, 2, 3]
+  : Array.from({ length: 8 }, (_, i) => (i + 1) * 15); // 15…120
+
+export const ROAST_OPEN_THRESHOLDS = ROAST_NOTIFICATION_TEST_MODE ? [3, 5] : [5, 8];
+
+export const ROAST_RAPID_OPEN_COUNT = 3;
+export const ROAST_RAPID_WINDOW_MS = ROAST_NOTIFICATION_TEST_MODE ? 3 * 60_000 : 10 * 60_000;
+
+export const ROAST_SESSION_THRESHOLDS_MIN = ROAST_NOTIFICATION_TEST_MODE ? [1, 2] : [30];
+
+export const ROAST_EARLY_MORNING_END_HOUR = ROAST_NOTIFICATION_TEST_MODE ? 12 : 7;

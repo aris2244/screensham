@@ -1,0 +1,22 @@
+node_modules/
+.expo/
+dist/
+*.jks
+*.keystore
+!android/app/debug.keystore
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+.env
+.env.local
+
+# Android signing secrets (never commit)
+android/app/release.keystore
+android/gradle.properties
+
+# Build outputs
+android/app/build/
+android/build/
