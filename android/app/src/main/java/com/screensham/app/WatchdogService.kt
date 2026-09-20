@@ -42,16 +42,25 @@ class WatchdogService : Service() {
         @Volatile var reactContext: ReactApplicationContext? = null
 
         private val sessionBypassPackages = HashSet<String>()
+        private val sessionBypassGrantTime = HashMap<String, Long>()
+
+        /** After unlocking, the app stays unblocked for this long regardless of open/close cycles. */
+        const val BYPASS_GRACE_PERIOD_MS = 15 * 60 * 1000L
+
+        /** Tracks the package currently in the foreground so bypass expiry never kicks the user out mid-session. */
+        @Volatile var activeForegroundPackage: String = ""
 
         @Volatile var pendingFrictionShow: Boolean = false
         @Volatile var lastBlockedPackage: String = ""
 
         /**
-         * Session bypass: user may continue using [packageName] only until they
-         * leave the app. Next open requires the typing challenge again.
+         * Session bypass: grants a 15-minute grace window starting now.
+         * During this window the app can be opened and closed freely without
+         * triggering the friction challenge again.
          */
         fun grantSessionBypass(packageName: String) {
             sessionBypassPackages.add(packageName)
+            sessionBypassGrantTime[packageName] = System.currentTimeMillis()
             instance?.triggeredPackages?.remove(packageName)
             instance?.lastBlockAttemptByPackage?.remove(packageName)
             instance?.lastForeground = packageName
@@ -65,11 +74,22 @@ class WatchdogService : Service() {
         }
 
         fun isBypassActive(packageName: String): Boolean {
-            return sessionBypassPackages.contains(packageName)
+            if (!sessionBypassPackages.contains(packageName)) return false
+            val grantTime = sessionBypassGrantTime[packageName] ?: return false
+            if (System.currentTimeMillis() - grantTime > BYPASS_GRACE_PERIOD_MS) {
+                // Grace period expired — but never kick the user out while the app is open.
+                // Only let the bypass truly expire once they have left the app.
+                if (activeForegroundPackage == packageName) return true
+                sessionBypassPackages.remove(packageName)
+                sessionBypassGrantTime.remove(packageName)
+                return false
+            }
+            return true
         }
 
         fun clearSessionBypass(packageName: String) {
             sessionBypassPackages.remove(packageName)
+            sessionBypassGrantTime.remove(packageName)
         }
 
         fun resetBlockState() {
@@ -78,6 +98,7 @@ class WatchdogService : Service() {
             FrictionLockActivity.isUnlocking = false
             BlockOverlayManager.hide()
             sessionBypassPackages.clear()
+            sessionBypassGrantTime.clear()
             instance?.triggeredPackages?.clear()
             instance?.lastBlockAttemptByPackage?.clear()
         }
@@ -314,17 +335,19 @@ class WatchdogService : Service() {
                 abandonFrictionIfNeeded(lastBlockedPackage)
             }
 
-            // User left a blocked app — clear session bypass so next open re-blocks
-            if (prev.isNotEmpty() && blockedApps.containsKey(prev) && prev != foreground &&
-                !activePackages.contains(prev)
-            ) {
-                clearSessionBypass(prev)
-                triggeredPackages.remove(prev)
-                lastBlockAttemptByPackage.remove(prev)
-
-                if (foreground != packageName && !activePackages.contains(packageName)) {
-                    BlockOverlayManager.hide()
-                    abandonFrictionIfNeeded(prev)
+            // User left a blocked app — if the 15-min grace window has expired,
+            // clean up block state so the next open triggers a new challenge.
+            // We no longer check activePackages here because apps like Instagram
+            // and YouTube never emit proper background events on many devices,
+            // causing their bypass to stay active forever under the old logic.
+            if (prev.isNotEmpty() && blockedApps.containsKey(prev) && prev != foreground) {
+                if (!isBypassActive(prev)) {
+                    triggeredPackages.remove(prev)
+                    lastBlockAttemptByPackage.remove(prev)
+                    if (foreground != packageName && !activePackages.contains(packageName)) {
+                        BlockOverlayManager.hide()
+                        abandonFrictionIfNeeded(prev)
+                    }
                 }
             }
 
@@ -332,8 +355,12 @@ class WatchdogService : Service() {
 
             if (foreground.isNotEmpty()) {
                 lastForeground = foreground
+                activeForegroundPackage = foreground
             } else if (activePackages.size == 1) {
                 lastForeground = activePackages.first()
+                activeForegroundPackage = activePackages.first()
+            } else {
+                activeForegroundPackage = ""
             }
         } catch (_: Exception) { }
 
