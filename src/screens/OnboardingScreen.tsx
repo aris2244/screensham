@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import {
+  Alert,
   Animated,
   Dimensions,
   KeyboardAvoidingView,
@@ -86,34 +87,46 @@ export default function OnboardingScreen({ onComplete }: Props) {
     });
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleContinue = async () => {
-    if (!canContinue()) return;
+    if (!canContinue() || isSaving) return;
 
     if (step < TOTAL_STEPS - 1) {
       slideToNext(() => setStep((s) => s + 1));
       return;
     }
 
-    const profileData = {
-      name:             name.trim(),
-      goal:             goal.trim(),
-      seriousness:      seriousness!,
-      currentScreenTime: screenTime!,
-      usesPhoneForWork,
-      goesOutSaturday:  goesOutSaturday!,
-      nemesisApp:       nemesisApp!,
-    };
+    setIsSaving(true);
+    try {
+      const profileData = {
+        name:              name.trim(),
+        goal:              goal.trim(),
+        seriousness:       seriousness!,
+        currentScreenTime: screenTime!,
+        usesPhoneForWork,
+        goesOutSaturday:   goesOutSaturday!,
+        nemesisApp:        nemesisApp!,
+      };
 
-    const profile: UserProfile = {
-      ...profileData,
-      dailyAllowanceMinutes: calculateDailyAllowance(profileData),
-      onboardingComplete: true,
-      permissionsSetupComplete: false,
-      createdAt: new Date().toISOString(),
-    };
+      const profile: UserProfile = {
+        ...profileData,
+        dailyAllowanceMinutes: calculateDailyAllowance(profileData),
+        onboardingComplete: true,
+        permissionsSetupComplete: false,
+        createdAt: new Date().toISOString(),
+      };
 
-    await saveUserProfile(profile);
-    onComplete();
+      await saveUserProfile(profile);
+      onComplete();
+    } catch (e) {
+      Alert.alert(
+        'Something went wrong',
+        e instanceof Error ? e.message : 'Could not save your plan. Please try again.',
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const getSeriousnessReaction = (n: number): string => {
@@ -348,13 +361,13 @@ export default function OnboardingScreen({ onComplete }: Props) {
 
         <View style={styles.footer}>
           <TouchableOpacity
-            style={[styles.continueBtn, !canContinue() && styles.continueBtnDisabled]}
+            style={[styles.continueBtn, (!canContinue() || isSaving) && styles.continueBtnDisabled]}
             onPress={handleContinue}
             activeOpacity={0.85}
-            disabled={!canContinue()}
+            disabled={!canContinue() || isSaving}
           >
-            <Text style={[styles.continueBtnText, !canContinue() && styles.continueBtnTextDisabled]}>
-              {step === TOTAL_STEPS - 1 ? 'Build my plan →' : 'Continue →'}
+            <Text style={[styles.continueBtnText, (!canContinue() || isSaving) && styles.continueBtnTextDisabled]}>
+              {isSaving ? 'Building...' : step === TOTAL_STEPS - 1 ? 'Build my plan →' : 'Continue →'}
             </Text>
           </TouchableOpacity>
         </View>
