@@ -34,12 +34,12 @@ const SCREEN_TIME_OPTIONS: { key: ScreenTimeOption; label: string; sub: string }
   { key: '6plus',  label: '6h+',      sub: 'We need to talk' },
 ];
 
-const NEMESIS_OPTIONS: { key: NemesisApp; label: string; sub: string }[] = [
-  { key: 'instagram', label: 'Instagram', sub: 'The highlight reel trap' },
-  { key: 'tiktok',    label: 'TikTok',    sub: 'The infinite scroll machine' },
-  { key: 'youtube',   label: 'YouTube',   sub: 'One more video syndrome' },
-  { key: 'snapchat',  label: 'Snapchat',  sub: 'The FOMO factory' },
-  { key: 'twitter',   label: 'Twitter / X', sub: 'The outrage engine' },
+const NEMESIS_OPTIONS: { key: NemesisApp; label: string }[] = [
+  { key: 'instagram', label: 'Instagram' },
+  { key: 'tiktok',    label: 'TikTok' },
+  { key: 'youtube',   label: 'YouTube' },
+  { key: 'snapchat',  label: 'Snapchat' },
+  { key: 'twitter',   label: 'Twitter / X' },
 ];
 
 interface Props {
@@ -259,9 +259,9 @@ export default function OnboardingScreen({ onComplete }: Props) {
           <View style={styles.stepWrap}>
             <Text style={styles.stepNum}>{stepLabel(step)}</Text>
             <Text style={styles.question}>
-              Do you go out{'\n'}on Saturdays?
+              Do you go out{'\n'}on the weekend?
             </Text>
-            <Text style={styles.questionSub}>Social life = less doom-scrolling time.</Text>
+            <Text style={styles.questionSub}>Different block times on weekends</Text>
             <View style={styles.bigChoiceRow}>
               <TouchableOpacity
                 style={[styles.bigChoice, goesOutSaturday === true && styles.bigChoiceSelected]}
@@ -271,7 +271,6 @@ export default function OnboardingScreen({ onComplete }: Props) {
                 <Text style={[styles.bigChoiceLabel, goesOutSaturday === true && styles.bigChoiceLabelSelected]}>
                   Yes
                 </Text>
-                <Text style={styles.bigChoiceSub}>I have a life</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -282,7 +281,6 @@ export default function OnboardingScreen({ onComplete }: Props) {
                 <Text style={[styles.bigChoiceLabel, goesOutSaturday === false && styles.bigChoiceLabelSelected]}>
                   No
                 </Text>
-                <Text style={styles.bigChoiceSub}>Classic homebody</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -294,12 +292,9 @@ export default function OnboardingScreen({ onComplete }: Props) {
           <View style={styles.stepWrap}>
             <Text style={styles.stepNum}>{stepLabel(step)}</Text>
             <Text style={styles.question}>
-              Which app is{'\n'}ruining your life?
+              Pick your{'\n'}addictive app
             </Text>
-            <Text style={styles.questionSub}>
-              Your nemesis. We'll roast you specifically for this one.
-            </Text>
-            <View style={styles.optionList}>
+            <View style={[styles.optionList, { marginTop: 8 }]}>
               {NEMESIS_OPTIONS.map((opt) => {
                 const isSelected = nemesisApp === opt.key;
                 return (
@@ -309,15 +304,9 @@ export default function OnboardingScreen({ onComplete }: Props) {
                     onPress={() => setNemesisApp(opt.key)}
                     activeOpacity={0.75}
                   >
-                    <View style={styles.nemesisCardLeft}>
-                      <Text style={[styles.nemesisLabel, isSelected && styles.nemesisLabelSelected]}>
-                        {opt.label}
-                      </Text>
-                      <Text style={[styles.nemesisSub, isSelected && styles.nemesisSubSelected]}>
-                        {opt.sub}
-                      </Text>
-                    </View>
-                    {/* Checkmark appears on selection */}
+                    <Text style={[styles.nemesisLabel, isSelected && styles.nemesisLabelSelected]}>
+                      {opt.label}
+                    </Text>
                     <View style={[styles.nemesisCheck, isSelected && styles.nemesisCheckSelected]}>
                       {isSelected && <Text style={styles.nemesisCheckMark}>✓</Text>}
                     </View>

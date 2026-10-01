@@ -211,8 +211,12 @@ export default function ProPaywallModal({ visible, onClose, source = 'settings' 
           )}
 
           <View style={s.referralBox}>
-            <Text style={s.referralTitle}>{REFERRAL_COPY.title}</Text>
-            <Text style={s.noCardNote}>No credit card needed.</Text>
+            <Text style={s.referralTitle}>
+              Invite a friend — get 1{' '}
+              <Text style={s.referralFree}>FREE</Text>
+              {' '}Pro month
+            </Text>
+            <Text style={s.noCardNote}>No credit card. No payment. Just share your link.</Text>
             <Text style={s.referralBody}>{REFERRAL_COPY.body}</Text>
             {state?.referralCode && (
               <View style={s.codeBox}>
@@ -450,6 +454,7 @@ const s = StyleSheet.create({
     marginTop: 6,
   },
   referralTitle: { color: C.white, fontSize: 16, fontWeight: '800', marginBottom: 4 },
+  referralFree: { color: '#ff4444', fontSize: 16, fontWeight: '900' },
   noCardNote: { color: '#4ade80', fontSize: 12, fontWeight: '600', marginBottom: 10 },
   referralBody: { color: C.gray, fontSize: 13, lineHeight: 20, marginBottom: 16 },
   codeBox: {

@@ -15,10 +15,12 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import CircularProgress from '../components/home/CircularProgress';
 import AppsBlockedButton from '../components/home/AppsBlockedButton';
 import SettingsModal from '../components/home/SettingsModal';
+import ProPromoModal from '../components/home/ProPromoModal';
 import { C } from '../constants/colors';
 import { BLOCK_SCREEN_FAILED_EVENT, syncWatchdogAllowance } from '../utils/watchdog';
 import {
@@ -290,6 +292,7 @@ export default function HomeScreen({
   const [blockedApps,            setBlockedApps]      = useState<BlockedApp[]>([]);
   const [subscriptionTier,       setSubscriptionTier] = useState<SubscriptionTier>('free');
   const [showProPaywall,         setShowProPaywall]   = useState(false);
+  const [showProPromo,           setShowProPromo]     = useState(false);
   const [weekData,               setWeekData]         = useState<(DayData | null)[]>(
     Array.from({ length: 7 }, () => null),
   );
@@ -333,6 +336,33 @@ export default function HomeScreen({
       setProfile(p);
       const sub = await refreshProFromReferrals();
       setSubscriptionTier(sub.tier);
+
+      // Show promo popup to free users: max 3 times, at least 2 days apart
+      if (sub.tier === 'free') {
+        try {
+          const COUNT_KEY = 'promo_popup_count';
+          const LAST_KEY  = 'promo_popup_last_shown';
+          const TWO_DAYS  = 2 * 24 * 60 * 60 * 1000;
+
+          const [rawCount, rawLast] = await Promise.all([
+            AsyncStorage.getItem(COUNT_KEY),
+            AsyncStorage.getItem(LAST_KEY),
+          ]);
+          const count    = rawCount ? parseInt(rawCount, 10) : 0;
+          const lastShown = rawLast ? parseInt(rawLast, 10) : 0;
+          const now      = Date.now();
+
+          if (count < 3 && (lastShown === 0 || now - lastShown >= TWO_DAYS)) {
+            await Promise.all([
+              AsyncStorage.setItem(COUNT_KEY, String(count + 1)),
+              AsyncStorage.setItem(LAST_KEY, String(now)),
+            ]);
+            setTimeout(() => setShowProPromo(true), 1500);
+          }
+        } catch {
+          // never crash HomeScreen over a promo
+        }
+      }
       if (p) {
         const apps = await ensureBlockedApps(p);
         setBlockedApps(apps);
@@ -604,6 +634,15 @@ export default function HomeScreen({
         visible={showProPaywall}
         onClose={() => setShowProPaywall(false)}
         source="blocked_limit"
+      />
+
+      <ProPromoModal
+        visible={showProPromo}
+        onClose={() => setShowProPromo(false)}
+        onGoToPro={() => {
+          setShowProPromo(false);
+          setShowProPaywall(true);
+        }}
       />
 
       {/* ── Friction / Lock Screen ────────────────────────── */}

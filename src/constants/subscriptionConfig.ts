@@ -44,7 +44,7 @@ export const PLAN_FEATURES = {
 export const MAX_REFERRAL_FREE_MONTHS = 3;
 
 export const REFERRAL_COPY = {
-  title: 'Invite a friend — get 1 free Pro month',
+  title: 'Invite a friend — get 1 month Pro',
   body: 'Share your link. When a friend installs and finishes setup, you get 1 month Pro. Max 3 months total. Pro is only available through invites right now.',
   shareTitle: 'ScreenSham — cut your screen time',
 } as const;
