@@ -176,7 +176,7 @@ export default function ProPaywallModal({ visible, onClose, source = 'settings' 
                   />
                   <View>
                     <Text style={[s.billingLabel, isAnnual && s.billingLabelActive]}>Annual</Text>
-                    <Text style={s.saveBadge}>−60%</Text>
+                    <Text style={s.saveBadge}>−69%</Text>
                   </View>
                 </View>
               </View>

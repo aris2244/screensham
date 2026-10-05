@@ -6,9 +6,9 @@ export type BillingPeriod = 'annual' | 'monthly';
 export const FREE_BLOCKED_APP_LIMIT = 1;
 
 /** Pricing */
-export const PRO_MONTHLY_PRICE = 5.0;             // €5/mo billed monthly
-export const PRO_ANNUAL_PER_MONTH = 1.99;         // €1.99/mo when billed annually
-export const PRO_ANNUAL_TOTAL = +(PRO_ANNUAL_PER_MONTH * 12).toFixed(2); // €23.88
+export const PRO_MONTHLY_PRICE = 3.99;            // €3.99/mo billed monthly
+export const PRO_ANNUAL_PER_MONTH = 1.25;         // €1.25/mo when billed annually
+export const PRO_ANNUAL_TOTAL = 14.99;            // €14.99/year
 
 export const WAITLIST_DISCOUNT_PERCENT = 50;
 
@@ -45,6 +45,6 @@ export const MAX_REFERRAL_FREE_MONTHS = 3;
 
 export const REFERRAL_COPY = {
   title: 'Invite a friend — get 1 month Pro',
-  body: 'Share your link. When a friend installs and finishes setup, you get 1 month Pro. Max 3 months total. Pro is only available through invites right now.',
+  body: 'Share your link. When a friend installs and finishes setup, you get 1 month Pro. Max 3 months total.',
   shareTitle: 'ScreenSham — cut your screen time',
 } as const;
