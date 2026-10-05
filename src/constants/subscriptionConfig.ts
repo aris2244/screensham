@@ -14,7 +14,7 @@ export const WAITLIST_DISCOUNT_PERCENT = 50;
 
 /** Legacy export — kept so stale bundles / hot reload don't crash on `.paywallNote`. */
 export const PRO_LAUNCH_COPY = {
-  title: 'Pro isn\'t available yet',
+  title: 'Payments aren\'t available yet',
   body: `Join the waitlist for ${WAITLIST_DISCOUNT_PERCENT}% off your first payment.`,
   cta: `Join waitlist — ${WAITLIST_DISCOUNT_PERCENT}% off`,
   paywallNote: 'No charge today. We\'ll email your discount code at launch.',
